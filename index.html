@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+    <button1 onclick="connectWallet()">Connect wallet</button1>    
+    <title>Mini Crypto Exchange</title>
+    <p>A simple Web3 trading demo platform (wallet connection + swap functionality)</p>
+    <p id="wallet"></p>
+    <p id="balance"></p>
+    <div class="main-box">
+        <h2>MINI CRYPTO EXCHANGE</h2>
+        <h1>BTC Trades</h1>
+        <p id="price">BTC price：70000</p>
+        <p id="result"></p>
+    <input 
+        id="amount" 
+        type="number" 
+        min="0.01" 
+        step="0.01" 
+        placeholder="0.00"
+        onkeypress="return (event.charCode != 45 && event.charCode != 101)"
+        oninput="if(value<=0)value=''; if(value.indexOf('.')>0)value=value.slice(0,value.indexOf('.')+3)"
+        >
+        <button onclick="buy()">Buy</button>
+        <button class="sell-btn" onclick="sell()">Sell</button>
+</div>
+<head>
+    <style>
+        body {
+            background-image: url(360_F_451969390_fwd7fUNbLuQ0125iqpsV98d1u6Jy7GTY.jpg); 
+            background-attachment:fixed;
+            background-position: center;
+            background-size: cover;
+            color: white;  
+            font-family: Comic, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+        }
+
+        .main-box {
+            background-color: #1e2329; /* 灰色背景 */
+            padding: 30px;            
+            border-radius: 20px;       
+            width: 200px;        
+            min-width: 450px;
+            margin: 20px auto;       
+            color: white;             
+            position: relative;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
+            border: 1px solid #2b3139;             
+        }  
+
+        h1 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-family:bold, Sans-serif;
+        }
+
+        h2 {
+            font-size: 45px;
+            margin-bottom: 35px;
+            letter-spacing: 1px;
+            color: rgb(238, 255, 0);  
+            font-family: Fantasy, bold;
+        }
+        p {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 10px;
+            width: 200px;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #2bff00;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button1 {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #2bff00;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            position: absolute;
+            right: 10px;
+            top: 4px;
+        }
+
+        button1:hover {
+            background-color: #45a049;
+        }
+
+        button:active {
+            transform: scale(0.95); 
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+        button:active {
+            transform: scale(0.95); 
+        }
+    
+        .sell-btn {
+            background-color: #e53935;
+        }
+        
+        .sell-btn:hover {
+            background-color: #a04545;
+        }  
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            color: yellow;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Swap ETH → USDT</h3>
+
+    <input 
+        id="ethAmount" 
+        type="number" 
+        step="0.01" 
+        min="0.01" 
+        placeholder="0.00"
+        oninput="if(value.indexOf('.')>0)value=value.slice(0,value.indexOf('.')+3)"
+        >
+
+    <p id="usdtAmount">USDT：0</p>
+
+    <button onclick="swap()">Swap</button>
+<script>
+    function buy() {
+        var inputElement = document.getElementById("amount"); // 获取输入框元素
+        var amount = Number(inputElement.value);
+        var result = document.getElementById("result");
+
+        // 1. 拦截 0 或以下数字，以及空值
+        if (amount <= 0) {
+            result.textContent = "❌ Please enter the correct quantity";
+            result.style.color = "#f6465d"; // 错误变红
+            inputElement.value = ""; // 输入错误也清空
+            return;
+        }
+
+        // 2. 执行成功逻辑
+        result.textContent = "✅ Successful purchase " + amount.toFixed(2) + " BTC";
+        result.style.color = "#0ecb81"; // 成功变绿
+
+        // 3. 核心：输入完自动清空
+        inputElement.value = "";
+    }
+
+    function sell() {
+        var inputElement = document.getElementById("amount");
+        var amount = Number(inputElement.value);
+        var result = document.getElementById("result");
+
+        // 1. 拦截 0 或以下数字
+        if (amount <= 0) {
+            result.textContent = "❌ Please enter the correct quantity";
+            result.style.color = "#f6465d";
+            inputElement.value = ""; 
+            return;
+        }
+
+        // 2. 执行成功逻辑
+        result.textContent = "🔻 Successfully sold " + amount.toFixed(2) + " BTC";
+        result.style.color = "#f6465d"; // 出售通常用红色
+
+        // 3. 核心：输入完自动清空
+        inputElement.value = "";
+    }
+</script>
+    <script>
+        function updatePrice() {
+            var priceElement = document.getElementById("price");
+            if (!priceElement) return; 
+
+            var current = Number(priceElement.textContent.replace("BTC price：", ""));
+            var change = Math.floor(Math.random() * 1001 - 500); 
+            var newPrice = current + change;
+
+            priceElement.textContent = "BTC price：" + newPrice;
+            
+            if (change >= 0) {
+                priceElement.style.color = "#0ecb81"; 
+            } else {
+                priceElement.style.color = "#f6465d"; 
+            }
+        }
+        setInterval(updatePrice, 1000);
+    </script>
+    <script>
+        async function connectWallet() {
+        if (window.ethereum) {
+            try {
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+
+            const wallet = accounts[0];
+            document.getElementById("wallet").textContent =
+                "Connected wallet：" + wallet;
+
+            const balance = await window.ethereum.request({
+                method: "eth_getBalance",
+                params: [wallet, "latest"],
+            });
+
+            const eth = parseInt(balance, 16) / 1e18;
+
+            document.getElementById("balance").textContent =
+                "Balance：" + eth.toFixed(4) + " ETH";
+
+            } catch (error) {
+            alert("Connection failed");
+            }
+        } else {
+            alert("Please install MetaMask");
+        }
+        }
+    </script>
+<script>
+    function swap() {
+        var ethInput = document.getElementById("ethAmount");
+        var result = document.getElementById("result");
+        var usdtDisplay = document.getElementById("usdtAmount");
+
+        // 如果没输入内容，直接返回
+        if (!ethInput.value) return;
+
+        // 再次确保数值精确到两位（防止某些浏览器的绕过）
+        var eth = Math.floor(Number(ethInput.value) * 100) / 100;
+
+        // 验证最小值
+        if (eth <= 0) {
+            result.textContent = "❌ Amount must be at least 0.01";
+            result.style.color = "#f6465d";
+            ethInput.value = ""; 
+            return;
+        }
+
+        // 计算汇率
+        var usdt = eth * 3500;
+        
+        // 格式化输出
+        var formattedEth = eth.toFixed(2);
+        var formattedUsdt = usdt.toFixed(2);
+
+        usdtDisplay.textContent = "USDT：" + formattedUsdt;
+        result.textContent = "✅ Swapped " + formattedEth + " ETH → " + formattedUsdt + " USDT";
+        result.style.color = "#0ecb81";
+
+        // 操作完清空
+        ethInput.value = "";
+    }
+</script>
+</body>
+
+</html>
